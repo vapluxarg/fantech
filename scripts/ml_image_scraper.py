@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup
 
 def obtener_imagen_mercadolibre(producto: str) -> Optional[str]:
     """
-    Recibe el nombre de un producto y devuelve
-    el enlace de la imagen del primer resultado en Mercado Libre (Argentina).
+    Recibe el nombre de un producto y devuelve la URL de la imagen
+    del primer resultado en Mercado Libre (Argentina).
     """
     query = producto.strip().replace(" ", "-")
     url = f"https://listado.mercadolibre.com.ar/{query}"

@@ -26,7 +26,8 @@ export default function Navbar() {
     prevCountRef.current = totalItems;
   }, [totalItems]);
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-gray-200">
+    <>
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href="/" aria-label="Fantech" className="group inline-flex items-center gap-1 font-semibold text-lg">
           <span className="bg-gradient-to-r from-cyan via-cyan/70 to-navy bg-clip-text text-transparent tracking-wider group-hover:shadow-blueGlow transition">Fantech</span>
@@ -38,7 +39,11 @@ export default function Navbar() {
             </Link>
           ))}
         </nav>
-        <button onClick={toggleCart} aria-label="Carrito" className={`relative p-2 rounded-md transition ${totalItems === 0 ? 'bg-white border border-black hover:bg-white' : 'bg-white hover:bg-gray-100'}`}>
+          <button
+            onClick={toggleCart}
+            aria-label="Carrito"
+            className={`relative hidden md:inline-flex p-2 rounded-md transition ${totalItems === 0 ? 'bg-white border border-black hover:bg-white' : 'bg-white hover:bg-gray-100'}`}
+          >
           <ShoppingCart size={24} className={totalItems === 0 ? "text-black" : "text-green-600"} />
           <span className={`absolute -top-1 -right-1 min-w-[22px] h-5 px-1.5 text-[11px] rounded-full flex items-center justify-center ${totalItems === 0 ? 'bg-white border border-black text-gray-500' : 'bg-green-500 text-white'} ${animateAdd && totalItems > 0 ? 'cart-added' : ''}`}>
             {totalItems}
@@ -71,7 +76,20 @@ export default function Navbar() {
         </div>
       )}
       {/* Línea inferior azul marino brillante */}
-      <div className="h-[3px] bg-gradient-to-r from-cyan to-navy"></div>
-    </header>
+        <div className="h-[3px] bg-gradient-to-r from-cyan to-navy"></div>
+      </header>
+      <button
+        onClick={toggleCart}
+        aria-label="Carrito"
+        className={`md:hidden fixed bottom-5 right-5 z-50 shadow-lg rounded-full p-4 border border-gray-200 bg-white transition hover:scale-105 ${animateAdd && totalItems > 0 ? 'cart-added' : ''}`}
+      >
+        <div className="relative">
+          <ShoppingCart size={26} className={totalItems === 0 ? "text-black" : "text-green-600"} />
+          <span className={`absolute -top-2 -right-2 min-w-[22px] h-5 px-1.5 text-[11px] rounded-full flex items-center justify-center ${totalItems === 0 ? 'bg-white border border-black text-gray-500' : 'bg-green-500 text-white'}`}>
+            {totalItems}
+          </span>
+        </div>
+      </button>
+    </>
   );
 }

@@ -72,18 +72,21 @@ export default function ProductCard({ product, compact = false, variant = 'stand
         ))}
       </div>
 
-      <div className={`${compact ? 'p-3' : 'p-4'} space-y-2 transition-all duration-300 ease-out group-hover:-translate-y-1`}>
-        <div className="flex items-center justify-between">
-          <span className="badge bg-cyan/15 text-navy">{product.category}</span>
-          <span className="text-xs text-navy/60">Stock: {product.stock}</span>
+      <div className={`${compact ? 'p-3' : 'p-4'} flex flex-col gap-2 transition-all duration-300 ease-out group-hover:-translate-y-1`}>
+        <div className="flex items-center justify-between gap-2">
+          <span className="badge bg-cyan/15 text-navy text-[11px] uppercase tracking-wide truncate max-w-[65%]">{product.category}</span>
+          <span className="text-[11px] text-navy/60 whitespace-nowrap">Stock: {product.stock}</span>
         </div>
         <Link href={`/products/${product.slug}`} className="block font-medium tracking-tight text-navy hover:text-cyan">
           {product.name}
         </Link>
-        <p className="text-sm text-navy/70 leading-snug line-clamp-1">{product.shortDescription || "Rendimiento profesional. Diseño premium."}</p>
-        <div className="flex items-center justify-between pt-1">
+        <p className="text-[13px] text-navy/70 leading-snug line-clamp-2 min-h-[32px]">{product.shortDescription || "Rendimiento profesional. Diseño premium."}</p>
+        <div className="flex items-end justify-between gap-2 pt-1">
           <p className={`${compact ? 'text-base' : 'text-lg'} font-semibold text-navy`}>{formatCurrency(product.price)}</p>
-          <Link href={`/products/${product.slug}`} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-navy text-white text-xs focus-accessible">
+          <Link
+            href={`/products/${product.slug}`}
+            className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-navy text-white text-[11px] uppercase tracking-wide shrink-0 focus-accessible"
+          >
             Más
             <span className="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden>›</span>
           </Link>
