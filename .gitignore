@@ -20,3 +20,7 @@ yarn-error.log*
 
 # Editor
 .vscode/
+
+# Python
+__pycache__/
+*.pyc
