@@ -1,11 +1,14 @@
 /**
- * Next.js configuration to support static export for GitHub Pages.
+ * Next.js configuration optimized for Vercel's build/runtime pipeline.
  */
-module.exports = {
-  output: 'export',
-  trailingSlash: true,
-  images: { unoptimized: true },
-  // Hostinger sirve el sitio en la raíz (fantecharg.com),
-  // así que no necesitamos basePath personalizado.
-  basePath: '',
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'http2.mlstatic.com' },
+      { protocol: 'https', hostname: 'placehold.co' },
+    ],
+  },
 };
+
+module.exports = nextConfig;

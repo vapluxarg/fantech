@@ -54,16 +54,10 @@ npm start
 ## Screenshots (agregar)
 - Home, detalle, carrito, flujo WhatsApp.
  
-## Deploy a GitHub Pages
-Opciones:
-- Deploy por rama usando la carpeta `docs/` o deploy automatizado con GitHub Actions (ver `.github/workflows/pages.yml`).
+## Deploy en Vercel
+1. Conecta el repositorio a tu cuenta de Vercel y selecciona el framework "Next.js" (lo detecta automáticamente).
+2. Build command: `npm run build` (ya configurado). Output directory: `.vercel/output`/`.next` (por defecto).
+3. Define variables como `NEXT_PUBLIC_WHATSAPP_NUMBER` desde la sección Environment Variables antes de desplegar.
+4. Vercel generará un deployment con SSR/ISR listo. Usa `npm run dev` para emularlo en local.
 
-Configuración en Settings → Pages:
-- Source: "Deploy from a branch"
-- Branch: `main` (o tu rama principal)
-- Folder: `/docs`
-
-Notas importantes para Pages:
-- Agrega el archivo [`docs/.nojekyll`](docs/.nojekyll) para que GitHub Pages sirva carpetas con guión bajo (como [`docs/_next`](docs/_next)).
-- El sitio publicado usa [`docs/index.html`](docs/index.html); el `README.md` del repositorio no se muestra en el sitio.
-- Verifica que todos los assets necesarios estén dentro de `docs/`.
+> Si más adelante necesitas exportar estático para GitHub Pages, crea un script separado con `next export` y una carpeta distinta para evitar mezclar flujos.
