@@ -1,2 +1,2 @@
-export const formatCurrency = (value, locale = 'es-AR', currency = 'ARS') =>
+export const formatCurrency = (value, locale = 'en-US', currency = 'USD') =>
   new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
