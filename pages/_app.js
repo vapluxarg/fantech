@@ -4,6 +4,7 @@ import { CurrencyProvider } from "../context/CurrencyContext";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import CartDrawer from "../components/cart/CartDrawer";
+import { Analytics } from "@vercel/analytics/react";
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -17,6 +18,7 @@ function MyApp({ Component, pageProps }) {
           <Footer />
           <CartDrawer />
         </div>
+        <Analytics />
       </CartProvider>
     </CurrencyProvider>
   );

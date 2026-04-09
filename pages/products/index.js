@@ -11,7 +11,7 @@ const pills = [
   { key: "nuevo", label: "Nuevo" },
 ];
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
   const { data: dbProducts } = await supabase
     .from('products')
     .select('id, title, price_usd, price_ars, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name), product_variants(price_usd, price_ars, preferred_currency, stock)')
@@ -37,7 +37,7 @@ export async function getServerSideProps() {
     };
   });
 
-  return { props: { products: mappedProducts } };
+  return { props: { products: mappedProducts }, revalidate: 60 };
 }
 
 export default function ProductsPage({ products }) {

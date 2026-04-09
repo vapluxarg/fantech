@@ -5,7 +5,24 @@ import { useCurrency } from "../../context/CurrencyContext";
 import { useEffect, useState } from "react";
 import RelatedCarousel from "../../components/products/RelatedCarousel";
 
-export async function getServerSideProps({ params }) {
+export async function getStaticPaths() {
+  const { data: dbProducts } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('store', 'fantech')
+    .eq('is_active', true);
+
+  const paths = (dbProducts || []).map(p => ({
+    params: { slug: p.slug }
+  }));
+
+  return {
+    paths,
+    fallback: 'blocking'
+  };
+}
+
+export async function getStaticProps({ params }) {
   const { data: dbProduct } = await supabase
     .from('products')
     .select('id, title, description, price_usd, price_ars, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name)')
@@ -62,7 +79,7 @@ export async function getServerSideProps({ params }) {
     .eq('is_active', true)
     .order('created_at');
 
-  return { props: { product, related, variants: dbVariants || [] } };
+  return { props: { product, related, variants: dbVariants || [] }, revalidate: 60 };
 }
 
 export default function ProductDetailPage({ product, related, variants }) {

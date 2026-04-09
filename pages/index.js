@@ -5,7 +5,7 @@ import { supabase } from "../utils/supabase";
 import { useCurrency } from "../context/CurrencyContext";
 import { useEffect, useMemo, useState } from "react";
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
   const { data: dbProducts } = await supabase
     .from('products')
     .select('id, title, price_usd, price_ars, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name), product_variants(price_usd, price_ars, preferred_currency)')
@@ -47,7 +47,7 @@ export async function getServerSideProps() {
     .eq('is_active', true)
     .order('name');
 
-  return { props: { products: mappedProducts, categories: categories || [] } };
+  return { props: { products: mappedProducts, categories: categories || [] }, revalidate: 60 };
 }
 
 export default function HomePage({ products = [], categories = [] }) {
