@@ -9,6 +9,15 @@ const nextConfig = {
       { protocol: 'https', hostname: 'placehold.co' },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/admin',
+        destination: `${process.env.NEXT_PUBLIC_VAPLUX_URL}/admin?store=fantech`,
+        permanent: false,
+      },
+    ]
+  },
 };
 
 module.exports = nextConfig;
