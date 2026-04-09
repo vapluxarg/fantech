@@ -2,12 +2,14 @@ import Link from "next/link";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "../../context/CartContext";
+import { useCurrency } from "../../context/CurrencyContext";
+import { supabase } from "../../utils/supabase";
 
-const links = [
+const baseLinks = [
   { href: "/", label: "Inicio" },
-  { href: "/products?category=iphone", label: "iPhone" },
-  { href: "/products?category=macs%20%26%20ipads", label: "Macs & iPads" },
-  { href: "/products?category=accesorios", label: "Accesorios" },
+];
+
+const endLinks = [
   { href: "/products", label: "Todos los Productos" },
 ];
 
@@ -16,6 +18,29 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [animateAdd, setAnimateAdd] = useState(false);
   const prevCountRef = useRef(totalItems);
+  const [catLinks, setCatLinks] = useState([]);
+  const { currency, toggleCurrency } = useCurrency();
+
+  useEffect(() => {
+    async function fetchCategories() {
+      const { data } = await supabase
+        .from('categories')
+        .select('name, slug')
+        .eq('store', 'fantech')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (data) {
+        setCatLinks(data.map(c => ({
+          href: `/products?category=${encodeURIComponent(c.name.toLowerCase())}`,
+          label: c.name
+        })));
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  const links = [...baseLinks, ...catLinks, ...endLinks];
 
   useEffect(() => {
     if (totalItems > prevCountRef.current) {
@@ -29,7 +54,7 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" aria-label="Fantech" className="group inline-flex items-center gap-1 font-semibold text-lg">
+        <Link href="/" aria-label="Fantech" className="group inline-flex items-center gap-1 font-semibold text-2xl lg:text-3xl">
           <span className="bg-gradient-to-r from-cyan via-cyan/70 to-navy bg-clip-text text-transparent tracking-wider group-hover:shadow-blueGlow transition">Fantech</span>
         </Link>
         <nav className="hidden md:flex items-center gap-6">
@@ -38,6 +63,10 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
+          <div className="flex items-center bg-gray-100 rounded-lg p-0.5 ml-2 border border-gray-200">
+            <button onClick={() => currency !== 'ARS' && toggleCurrency()} className={`text-xs font-bold rounded-md px-3 py-1 transition ${currency === 'ARS' ? 'bg-white shadow text-navy' : 'text-gray-400 hover:text-navy hover:bg-gray-200/50'}`}>AR$</button>
+            <button onClick={() => currency !== 'USD' && toggleCurrency()} className={`text-xs font-bold rounded-md px-3 py-1 transition ${currency === 'USD' ? 'bg-white shadow text-navy' : 'text-gray-400 hover:text-navy hover:bg-gray-200/50'}`}>US$</button>
+          </div>
         </nav>
           <button
             onClick={toggleCart}

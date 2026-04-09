@@ -1,21 +1,24 @@
 import "../styles/globals.css";
 import { CartProvider } from "../context/CartContext";
+import { CurrencyProvider } from "../context/CurrencyContext";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import CartDrawer from "../components/cart/CartDrawer";
 
 function MyApp({ Component, pageProps }) {
   return (
-    <CartProvider>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1">
-          <Component {...pageProps} />
-        </main>
-        <Footer />
-        <CartDrawer />
-      </div>
-    </CartProvider>
+    <CurrencyProvider>
+      <CartProvider>
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+          <main className="flex-1">
+            <Component {...pageProps} />
+          </main>
+          <Footer />
+          <CartDrawer />
+        </div>
+      </CartProvider>
+    </CurrencyProvider>
   );
 }
 

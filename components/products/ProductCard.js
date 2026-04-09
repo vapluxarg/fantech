@@ -1,95 +1,99 @@
 import Link from "next/link";
-import { useRef, useState } from "react";
-import { formatCurrency } from "../../utils/format";
+import { ShoppingCart } from "lucide-react";
+import { useCart } from "../../context/CartContext";
+import { useCurrency } from "../../context/CurrencyContext";
+import { useState } from "react";
 
-export default function ProductCard({ product, compact = false, variant = 'standard' }) {
-  const cardRef = useRef(null);
-  const frameRef = useRef(0);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+export default function ProductCard({ product }) {
+  const { addToCart } = useCart();
+  const { formatPrice, getProductPrice } = useCurrency();
+  const [pop, setPop] = useState(false);
+
+  let displayPrice = formatPrice(product);
+  let hasPrefix = false;
+  let stock = product.stock;
+
+  if (product.has_variants && product.variants && product.variants.length > 0) {
+    stock = product.variants.reduce((acc, v) => acc + Number(v.stock || 0), 0);
+    const validVariants = product.variants.filter(v => getProductPrice(v) > 0);
+    if (validVariants.length > 0) {
+      const minVariant = validVariants.reduce((min, v) => getProductPrice(v) < getProductPrice(min) ? v : min, validVariants[0]);
+      displayPrice = formatPrice(minVariant);
+      hasPrefix = true;
+    }
+  }
 
   const tags = [];
   if (/pro/i.test(product.name)) tags.push("Pro");
   if (/17/.test(product.name)) tags.push("Nuevo");
-  const isFeatured = ["iphone-17-pro-max", "iphone-17-pro", "ultrabook-pro-14", "pro-tablet-x"].includes(product.slug);
+  const isFeatured = ["iphone-17-pro-max", "iphone-17-pro", "macbook-pro-14-m5", "macbook-air-15-m4"].includes(product.slug);
   if (isFeatured) tags.push("Destacado");
 
-  const variantClass = variant === 'flagship' ? 'card-flagship' : variant === 'accessory' ? 'card-accessory' : '';
-
-  const handleMouseMove = (e) => {
-    const el = cardRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const rx = (e.clientX - rect.left) / rect.width; // 0..1
-    const ry = (e.clientY - rect.top) / rect.height; // 0..1
-    const rotY = (rx - 0.5) * 12; // -6..6
-    const rotX = (0.5 - ry) * 12; // -6..6
-    if (frameRef.current) return;
-    frameRef.current = requestAnimationFrame(() => {
-      setTilt({ x: rotX, y: rotY });
-      frameRef.current = 0;
-    });
-  };
-
-  const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 });
-  };
-
-  const tiltStyle = {
-    transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-    transition: 'transform 120ms ease-out',
-    willChange: 'transform',
-  };
-
-  const imgParallaxStyle = {
-    transform: `translateX(${tilt.y * 0.8}px) translateY(${(-tilt.x) * 0.8}px)`,
+  const handleAddCart = (e) => {
+    e.preventDefault();
+    setPop(true);
+    addToCart(product, 1);
+    setTimeout(() => setPop(false), 240);
   };
 
   return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={tiltStyle}
-      className={`group ${compact ? '' : 'card'} ${variantClass} relative overflow-hidden bg-white card-structure-shadow hover:card-glow-shadow card-hover stagger-hover focus-accessible`}
-    > 
-      {/* borde inteligente con gradiente (solo en hover) */}
-      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 ring-gradient-hover" />
-      <Link href={`/products/${product.slug}`} className="block">
-        <div className={`w-full overflow-hidden ${compact ? 'rounded-t-lg aspect-[4/3]' : 'rounded-t-xl aspect-[4/3]'} image-safe-zone` }>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={product.image}
-            alt={product.name}
-            className={`w-full h-full object-contain transition-transform duration-300 delay-75 group-hover:scale-[1.03]`}
-            style={imgParallaxStyle}
-          />
-        </div>
+    <div className="group bg-white rounded-2xl border border-gray-200 p-4 flex flex-col hover:shadow-blueGlow transition-all duration-300">
+      {/* Container Fotografía */}
+      <Link href={`/products/${product.slug}`} className="block relative aspect-square bg-graylight/30 rounded-xl overflow-hidden mb-5 flex items-center justify-center">
+        {stock <= 0 && (
+          <div className="absolute top-3 left-3 bg-red-100/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-black text-red-600 uppercase tracking-widest z-10 shadow-sm">
+            Sin Stock
+          </div>
+        )}
+        {tags.length > 0 && (
+          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-black text-navy uppercase tracking-widest z-10 shadow-sm">
+            {tags[0]}
+          </div>
+        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
+        />
       </Link>
-      {/* badge premium con efecto glass */}
-      <div className="absolute top-3 left-3 flex gap-1">
-        {tags.slice(0,2).map(t => (
-          <span key={t} className="glass-badge">{t}</span>
-        ))}
-      </div>
 
-      <div className={`${compact ? 'p-3' : 'p-4'} flex flex-col gap-2 transition-all duration-300 ease-out group-hover:-translate-y-1`}>
-        <div className="flex items-center justify-between gap-2">
-          <span className="badge bg-cyan/15 text-navy text-[11px] uppercase tracking-wide truncate max-w-[65%]">{product.category}</span>
-          <span className="text-[11px] text-navy/60 whitespace-nowrap">Stock: {product.stock}</span>
-        </div>
-        <Link href={`/products/${product.slug}`} className="block font-medium tracking-tight text-navy hover:text-cyan">
-          {product.name}
+      {/* Detalles del Producto */}
+      <div className="flex flex-col flex-1">
+        <span className="text-[10px] text-navy/50 font-bold uppercase tracking-widest mb-1 truncate block" title={product.category}>{product.category}</span>
+        <Link href={`/products/${product.slug}`} className="block">
+          <h3 className="text-navy font-bold text-base sm:text-lg leading-tight mb-2 line-clamp-2 hover:text-cyan transition-colors" title={product.name}>
+            {product.name}
+          </h3>
         </Link>
-        <p className="text-[13px] text-navy/70 leading-snug line-clamp-2 min-h-[32px]">{product.shortDescription || "Rendimiento profesional. Diseño premium."}</p>
-        <div className="flex items-end justify-between gap-2 pt-1">
-          <p className={`${compact ? 'text-base' : 'text-lg'} font-semibold text-navy`}>{formatCurrency(product.price)}</p>
+        <p className="text-cyan font-black text-xl sm:text-2xl mb-4 mt-auto truncate break-words leading-tight">
+          {hasPrefix ? (
+            <>
+              <span className="text-xs text-navy/50 tracking-widest uppercase mr-1">Desde</span>
+              {displayPrice}
+            </>
+          ) : (
+            displayPrice
+          )}
+        </p>
+
+        {/* Botones */}
+        <div className="flex gap-2">
           <Link
             href={`/products/${product.slug}`}
-            className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-navy text-white text-[11px] uppercase tracking-wide shrink-0 focus-accessible"
+            className="flex-1 flex justify-center items-center bg-cyan hover:bg-cyan/90 text-white font-black py-3 rounded-xl text-xs sm:text-sm transition-all active:scale-95 text-center min-w-[100px]"
           >
-            Más
-            <span className="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden>›</span>
+            Ver equipo
           </Link>
+          {!product.has_variants && (
+            <button
+              onClick={handleAddCart}
+              aria-label="Agregar al carrito"
+              className={`w-12 h-12 flex items-center justify-center bg-graylight hover:bg-gray-200 text-navy rounded-xl transition-all ${pop ? 'animate-clickPop' : ''}`}
+            >
+              <ShoppingCart size={20} />
+            </button>
+          )}
         </div>
       </div>
     </div>

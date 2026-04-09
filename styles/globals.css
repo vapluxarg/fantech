@@ -67,10 +67,10 @@ a { @apply text-navy; }
   .anim-delay-300 { animation-delay: 300ms; }
   .anim-delay-500 { animation-delay: 500ms; }
   .btn-cta {
-    @apply inline-flex items-center justify-center px-5 py-3 rounded-md bg-cyan text-white font-medium shadow-blueGlow hover:shadow-blueGlow transition;
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-xl bg-cyan text-white font-medium shadow-md hover:shadow-blueGlow transition duration-300 active:animate-clickPop;
   }
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-none transition;
+    @apply bg-white/70 backdrop-blur-md rounded-xl border border-white/50 shadow-sm hover:shadow-blueGlow transition-all duration-300;
   }
   .card-hover {
     @apply hover:ring-8 hover:ring-offset-2 hover:ring-offset-white hover:ring-navy/60 hover:border-2 hover:border-navy hover:shadow-blueGlow transition-all duration-1000 delay-100 ease-out;
@@ -123,13 +123,13 @@ a { @apply text-navy; }
     @apply transition-transform duration-500 ease-out group-hover:scale-[1.03];
   }
   .details-panel {
-    @apply bg-white border border-gray-200 rounded-xl;
+    @apply bg-white/70 backdrop-blur-md border border-white/50 rounded-xl hover:shadow-blueGlow transition-all duration-300;
   }
   .details-summary {
-    @apply cursor-pointer select-none px-4 py-3 text-sm font-medium flex items-center justify-between;
+    @apply cursor-pointer select-none px-5 py-4 text-sm font-medium flex items-center justify-between;
   }
   .details-content {
-    @apply px-4 pb-4 text-sm text-navy/80;
+    @apply px-5 pb-5 text-sm text-navy/80;
   }
 
   @keyframes cartAddedPulse {
@@ -150,5 +150,19 @@ a { @apply text-navy; }
   }
   .btn-pop {
     animation: clickPop 240ms ease-out;
+  }
+
+  .simple-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .simple-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .simple-scrollbar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+  }
+  .simple-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
   }
 }
