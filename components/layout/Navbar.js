@@ -90,17 +90,25 @@ export default function Navbar() {
       {/* Panel móvil */}
       {mobileOpen && (
         <div className="md:hidden bg-white/95 backdrop-blur border-t border-gray-200">
-          <nav className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-2">
+          <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2">
             {links.map(l => (
               <Link
                 key={l.href}
                 href={l.href}
-                className="py-2 px-2 rounded-md hover:bg-gray-100 text-navy"
+                className="py-2 px-2 rounded-md hover:bg-gray-100 text-navy font-medium"
                 onClick={() => setMobileOpen(false)}
               >
                 {l.label}
               </Link>
             ))}
+            
+            <div className="border-t border-gray-100 mt-2 pt-3 px-2 flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-500">Moneda</span>
+              <div className="flex items-center bg-gray-100 rounded-lg p-0.5 border border-gray-200">
+                <button onClick={() => currency !== 'ARS' && toggleCurrency()} className={`text-sm font-bold rounded-md px-4 py-1 transition ${currency === 'ARS' ? 'bg-white shadow text-navy' : 'text-gray-400 hover:text-navy hover:bg-gray-200/50'}`}>AR$</button>
+                <button onClick={() => currency !== 'USD' && toggleCurrency()} className={`text-sm font-bold rounded-md px-4 py-1 transition ${currency === 'USD' ? 'bg-white shadow text-navy' : 'text-gray-400 hover:text-navy hover:bg-gray-200/50'}`}>US$</button>
+              </div>
+            </div>
           </nav>
         </div>
       )}
