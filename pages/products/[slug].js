@@ -25,7 +25,7 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }) {
   const { data: dbProduct } = await supabase
     .from('products')
-    .select('id, title, description, price_usd, price_ars, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name)')
+    .select('id, title, description, price_usd, price_ars, price_usdt, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name)')
     .eq('store', 'fantech')
     .eq('slug', params.slug)
     .single();
@@ -42,6 +42,7 @@ export async function getStaticProps({ params }) {
     price: dbProduct.price_usd,
     price_usd: dbProduct.price_usd,
     price_ars: dbProduct.price_ars,
+    price_usdt: dbProduct.price_usdt,
     preferred_currency: dbProduct.preferred_currency || 'usd',
     has_variants: dbProduct.has_variants,
     stock: dbProduct.stock,
@@ -53,7 +54,7 @@ export async function getStaticProps({ params }) {
 
   const { data: dbRelated } = await supabase
     .from('products')
-    .select('id, title, price_usd, price_ars, preferred_currency, image_urls, slug, stock, categories!inner(name)')
+    .select('id, title, price_usd, price_ars, price_usdt, preferred_currency, image_urls, slug, stock, categories!inner(name)')
     .eq('store', 'fantech')
     .eq('categories.name', product.category)
     .neq('slug', product.slug)
@@ -67,6 +68,7 @@ export async function getStaticProps({ params }) {
     price: p.price_usd,
     price_usd: p.price_usd,
     price_ars: p.price_ars,
+    price_usdt: p.price_usdt,
     preferred_currency: p.preferred_currency || 'usd',
     stock: p.stock,
     image: p.image_urls?.[0] || ''

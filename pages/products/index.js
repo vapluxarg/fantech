@@ -14,7 +14,7 @@ const pills = [
 export async function getStaticProps() {
   const { data: dbProducts } = await supabase
     .from('products')
-    .select('id, title, price_usd, price_ars, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name), product_variants(price_usd, price_ars, preferred_currency, stock)')
+    .select('id, title, price_usd, price_ars, price_usdt, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name), product_variants(price_usd, price_ars, price_usdt, preferred_currency, stock)')
     .eq('store', 'fantech')
     .eq('is_active', true);
 
@@ -27,6 +27,7 @@ export async function getStaticProps() {
       price: p.price_usd,
       price_usd: p.price_usd,
       price_ars: p.price_ars,
+      price_usdt: p.price_usdt,
       preferred_currency: p.preferred_currency || 'usd',
       has_variants: p.has_variants,
       variants: p.product_variants || [],

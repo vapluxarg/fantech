@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useMemo } from 'react'
-import { getDolarBlue } from '../utils/dolar'
+import { getDolarBlue, getDolarCripto } from '../utils/dolar'
 import { formatCurrency as formatBase } from '../utils/format'
 
 const CurrencyContext = createContext(null)
@@ -10,6 +10,7 @@ const formatARS = (val) => formatBase(val, 'es-AR', 'ARS')
 export function CurrencyProvider({ children }) {
   const [currency, setCurrency] = useState('USD') // Fantech default is USD
   const [dolarBlue, setDolarBlue] = useState(1200)
+  const [dolarCripto, setDolarCripto] = useState(1200)
 
   useEffect(() => {
     // Load preference
@@ -18,8 +19,9 @@ export function CurrencyProvider({ children }) {
 
     // Fetch rate
     async function fetchRate() {
-      const rate = await getDolarBlue()
-      setDolarBlue(rate)
+      const [blue, cripto] = await Promise.all([getDolarBlue(), getDolarCripto()])
+      setDolarBlue(blue)
+      setDolarCripto(cripto)
     }
     fetchRate()
   }, [])
@@ -41,10 +43,16 @@ export function CurrencyProvider({ children }) {
     // Object with price fields
     const pref = p.preferred_currency || 'usd'
     if (currency === 'USD') {
-      const val = pref === 'ars' ? (Number(p.price_ars || 0) / dolarBlue) : Number(p.price_usd || p.price || 0)
+      let val = 0;
+      if (pref === 'ars') val = Number(p.price_ars || 0) / dolarBlue;
+      else if (pref === 'usdt') val = (Number(p.price_usdt || p.price || 0) * dolarCripto) / dolarBlue;
+      else val = Number(p.price_usd || p.price || 0);
       return formatUSD(val)
     } else {
-      const val = pref === 'ars' ? Number(p.price_ars || 0) : (Number(p.price_usd || p.price || 0) * dolarBlue)
+      let val = 0;
+      if (pref === 'ars') val = Number(p.price_ars || 0);
+      else if (pref === 'usdt') val = Number(p.price_usdt || p.price || 0) * dolarCripto;
+      else val = Number(p.price_usd || p.price || 0) * dolarBlue;
       return formatARS(val)
     }
   }
@@ -54,6 +62,8 @@ export function CurrencyProvider({ children }) {
     const val = Number(p.promo_price)
     if (p.preferred_currency === 'usd') {
       return currency === 'USD' ? formatUSD(val) : formatARS(val * dolarBlue)
+    } else if (p.preferred_currency === 'usdt') {
+      return currency === 'USD' ? formatUSD((val * dolarCripto) / dolarBlue) : formatARS(val * dolarCripto)
     } else {
       return currency === 'ARS' ? formatARS(val) : formatUSD(val / dolarBlue)
     }
@@ -66,6 +76,8 @@ export function CurrencyProvider({ children }) {
       const val = Number(p.promo_price)
       if (p.preferred_currency === 'usd') {
         return currency === 'USD' ? val : (val * dolarBlue)
+      } else if (p.preferred_currency === 'usdt') {
+        return currency === 'USD' ? (val * dolarCripto) / dolarBlue : (val * dolarCripto)
       } else {
         return currency === 'ARS' ? val : (val / dolarBlue)
       }
@@ -73,9 +85,13 @@ export function CurrencyProvider({ children }) {
     // Regular
     const pref = p.preferred_currency || 'usd'
     if (currency === 'USD') {
-      return pref === 'ars' ? (Number(p.price_ars || 0) / dolarBlue) : Number(p.price_usd || p.price || 0)
+      if (pref === 'ars') return Number(p.price_ars || 0) / dolarBlue;
+      if (pref === 'usdt') return (Number(p.price_usdt || p.price || 0) * dolarCripto) / dolarBlue;
+      return Number(p.price_usd || p.price || 0);
     } else {
-      return pref === 'ars' ? Number(p.price_ars || 0) : (Number(p.price_usd || p.price || 0) * dolarBlue)
+      if (pref === 'ars') return Number(p.price_ars || 0);
+      if (pref === 'usdt') return Number(p.price_usdt || p.price || 0) * dolarCripto;
+      return Number(p.price_usd || p.price || 0) * dolarBlue;
     }
   }
 
@@ -92,11 +108,12 @@ export function CurrencyProvider({ children }) {
     },
     toggleCurrency,
     dolarBlue,
+    dolarCripto,
     formatPrice,
     formatPromoPrice,
     getProductPrice,
     calculateTotal
-  }), [currency, dolarBlue])
+  }), [currency, dolarBlue, dolarCripto])
 
   return (
     <CurrencyContext.Provider value={value}>

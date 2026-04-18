@@ -8,20 +8,11 @@ import { useEffect, useMemo, useState } from "react";
 export async function getStaticProps() {
   const { data: dbProducts } = await supabase
     .from('products')
-    .select('id, title, price_usd, price_ars, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name), product_variants(price_usd, price_ars, preferred_currency)')
+    .select('id, title, price_usd, price_ars, price_usdt, preferred_currency, has_variants, image_urls, slug, stock, categories!inner(name), product_variants(price_usd, price_ars, price_usdt, preferred_currency)')
     .eq('store', 'fantech')
     .eq('is_active', true);
 
   const mappedProducts = (dbProducts || []).map(p => {
-    let _variantMinPrice = null;
-    if (p.has_variants) {
-      const variantPrices = (p.product_variants || []).flatMap(v => [
-        v.preferred_currency === 'usd' ? (v.price_usd || 0) : null,
-        v.preferred_currency === 'ars' ? (v.price_ars || 0) : null
-      ]).filter(x => x !== null && x > 0);
-      _variantMinPrice = variantPrices.length > 0 ? Math.min(...variantPrices) : null;
-    }
-
     return {
       id: p.id,
       name: p.title,
@@ -30,9 +21,10 @@ export async function getStaticProps() {
       price: p.price_usd,
       price_usd: p.price_usd,
       price_ars: p.price_ars,
+      price_usdt: p.price_usdt,
       preferred_currency: p.preferred_currency || 'usd',
       has_variants: p.has_variants,
-      _variantMinPrice,
+      variants: p.product_variants || [],
       stock: p.stock,
       image: p.image_urls?.[0] || '',
       shortDescription: 'Rendimiento y diseño premium.',
@@ -51,7 +43,7 @@ export async function getStaticProps() {
 }
 
 export default function HomePage({ products = [], categories = [] }) {
-  const { formatPrice } = useCurrency();
+  const { formatPrice, getProductPrice } = useCurrency();
   const topMetrics = products.slice(0, 3);
 
   const categoriesWithProducts = categories.map(c => ({
@@ -87,9 +79,18 @@ export default function HomePage({ products = [], categories = [] }) {
                 <div className="z-20 w-full p-5 bg-white border-t border-gray-50 shrink-0">
                   <h4 className="text-navy font-bold tracking-tight text-lg line-clamp-1 truncate" title={topMetrics[0]?.name}>{topMetrics[0]?.name}</h4>
                   <p className="text-cyan font-extrabold mt-1 text-xl truncate">
-                    {topMetrics[0]?.has_variants && topMetrics[0]?._variantMinPrice > 0 ? (
-                      <><span className="text-xs text-navy/50 uppercase tracking-widest mr-1">Desde</span>{formatPrice(topMetrics[0]?._variantMinPrice)}</>
-                    ) : formatPrice(topMetrics[0])}
+                    {(() => {
+                      const p = topMetrics[0];
+                      if (!p) return null;
+                      if (p.has_variants && p.variants && p.variants.length > 0) {
+                        const validVariants = p.variants.filter(v => getProductPrice(v) > 0);
+                        if (validVariants.length > 0) {
+                          const minVariant = validVariants.reduce((min, v) => getProductPrice(v) < getProductPrice(min) ? v : min, validVariants[0]);
+                          return <><span className="text-xs text-navy/50 uppercase tracking-widest mr-1">Desde</span>{formatPrice(minVariant)}</>;
+                        }
+                      }
+                      return formatPrice(p);
+                    })()}
                   </p>
                 </div>
               </Link>
@@ -105,9 +106,18 @@ export default function HomePage({ products = [], categories = [] }) {
                   <div className="w-full p-3 sm:p-3 bg-white border-t border-gray-50 z-20 shrink-0">
                     <h4 className="text-navy font-bold tracking-tight text-[13px] sm:text-sm line-clamp-1 truncate" title={topMetrics[1]?.name}>{topMetrics[1]?.name}</h4>
                     <p className="text-cyan font-bold mt-1 text-sm sm:text-base truncate">
-                      {topMetrics[1]?.has_variants && topMetrics[1]?._variantMinPrice > 0 ? (
-                        <><span className="text-[10px] text-navy/50 uppercase tracking-widest mr-1">Desde</span>{formatPrice(topMetrics[1]?._variantMinPrice)}</>
-                      ) : formatPrice(topMetrics[1])}
+                      {(() => {
+                        const p = topMetrics[1];
+                        if (!p) return null;
+                        if (p.has_variants && p.variants && p.variants.length > 0) {
+                          const validVariants = p.variants.filter(v => getProductPrice(v) > 0);
+                          if (validVariants.length > 0) {
+                            const minVariant = validVariants.reduce((min, v) => getProductPrice(v) < getProductPrice(min) ? v : min, validVariants[0]);
+                            return <><span className="text-[10px] text-navy/50 uppercase tracking-widest mr-1">Desde</span>{formatPrice(minVariant)}</>;
+                          }
+                        }
+                        return formatPrice(p);
+                      })()}
                     </p>
                   </div>
                 </Link>
@@ -121,9 +131,18 @@ export default function HomePage({ products = [], categories = [] }) {
                   <div className="w-full p-3 sm:p-3 bg-white border-t border-gray-50 z-20 shrink-0">
                     <h4 className="text-navy font-bold tracking-tight text-[13px] sm:text-sm line-clamp-1 truncate" title={topMetrics[2]?.name}>{topMetrics[2]?.name}</h4>
                     <p className="text-cyan font-bold mt-1 text-sm sm:text-base truncate">
-                      {topMetrics[2]?.has_variants && topMetrics[2]?._variantMinPrice > 0 ? (
-                        <><span className="text-[10px] text-navy/50 uppercase tracking-widest mr-1">Desde</span>{formatPrice(topMetrics[2]?._variantMinPrice)}</>
-                      ) : formatPrice(topMetrics[2])}
+                      {(() => {
+                        const p = topMetrics[2];
+                        if (!p) return null;
+                        if (p.has_variants && p.variants && p.variants.length > 0) {
+                          const validVariants = p.variants.filter(v => getProductPrice(v) > 0);
+                          if (validVariants.length > 0) {
+                            const minVariant = validVariants.reduce((min, v) => getProductPrice(v) < getProductPrice(min) ? v : min, validVariants[0]);
+                            return <><span className="text-[10px] text-navy/50 uppercase tracking-widest mr-1">Desde</span>{formatPrice(minVariant)}</>;
+                          }
+                        }
+                        return formatPrice(p);
+                      })()}
                     </p>
                   </div>
                 </Link>
@@ -196,9 +215,16 @@ export default function HomePage({ products = [], categories = [] }) {
                         <span className="text-[10px] font-bold text-cyan tracking-wider uppercase mb-0.5 truncate block">{p.category}</span>
                         <h4 className="text-navy font-bold text-sm mb-1 line-clamp-2 lg:line-clamp-1 leading-tight break-words">{p.name}</h4>
                         <p className="text-navy font-extrabold text-sm lg:text-base truncate">
-                          {p.has_variants && p._variantMinPrice > 0 ? (
-                            <><span className="text-[10px] text-navy/50 uppercase tracking-widest mr-1">Desde</span>{formatPrice(p._variantMinPrice)}</>
-                          ) : formatPrice(p)}
+                          {(() => {
+                            if (p.has_variants && p.variants && p.variants.length > 0) {
+                              const validVariants = p.variants.filter(v => getProductPrice(v) > 0);
+                              if (validVariants.length > 0) {
+                                const minVariant = validVariants.reduce((min, v) => getProductPrice(v) < getProductPrice(min) ? v : min, validVariants[0]);
+                                return <><span className="text-[10px] text-navy/50 uppercase tracking-widest mr-1">Desde</span>{formatPrice(minVariant)}</>;
+                              }
+                            }
+                            return formatPrice(p);
+                          })()}
                         </p>
                       </div>
                     </Link>

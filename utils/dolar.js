@@ -8,3 +8,14 @@ export async function getDolarBlue() {
     return 1200; // Fallback
   }
 }
+
+export async function getDolarCripto() {
+  try {
+    const res = await fetch("https://dolarapi.com/v1/dolares/cripto");
+    const data = await res.json();
+    return data.venta || 1200;
+  } catch (error) {
+    console.error("Error fetching Dolar Cripto:", error);
+    return 1200; // Fallback
+  }
+}
